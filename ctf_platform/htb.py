@@ -114,7 +114,7 @@ Your system information is as follows:
 3. Based on the play_methods in the challenge information:
    a) If BOTH download AND container are available:
       - Download challenge files using download_challenge_file()
-      - Extract with password "hackthebox" to `extract/` directory
+      - Extract with password "hackthebox" to `extract/<challenge_id>` directory
       - Analyze files for vulnerabilities and functionality
       - Start a container instance with start_container_instance()
       - Get updated challenge info for connection details (play_info.ip and play_info.port)
@@ -125,7 +125,7 @@ Your system information is as follows:
    
    c) If ONLY download is available:
       - Download challenge files using download_challenge_file()
-      - Extract with password "hackthebox"  to `extract/` directory
+      - Extract with password "hackthebox"  to `extract/<challenge_id>` directory
       - Analyze files for vulnerabilities and functionality
 
 4. Utilize available tools:
@@ -135,13 +135,14 @@ Your system information is as follows:
    - Install additional tools as needed using execute_command()
 
 5. For custom exploits:
-   - Create files using write_file() in the exploit/ directory
+   - Create files using write_file() in the exploits/<challenge_id> directory
    - Set permissions with change_file_permissions()
    - Execute with execute_command()
 
-6. Submit the discovered flag using submit_flag().
+6. Submit the discovered flag (format "HTB{...}") using submit_flag().
 
 Always approach challenges methodically, thinking step-by-step.
+Don't make up your own flags and try to submit, only submit when you are sure you have the correct flag.
 Ensure proper parameter usage with all functions.
 """
 
