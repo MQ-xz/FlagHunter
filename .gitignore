@@ -1,0 +1,9 @@
+venv/
+.env
+
+downloads/
+extract/
+exploits/
+logs/
+
+__pycache__/
