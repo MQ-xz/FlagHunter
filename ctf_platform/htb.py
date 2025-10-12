@@ -1,6 +1,7 @@
 """HTB related tools"""
 
 import os
+import sys
 from dotenv import load_dotenv
 from tools.request import send_request_and_get_response, download_file
 from tools.file_operations import (
@@ -33,7 +34,7 @@ htb_headers = {
 }
 
 
-def get_challenge_info(challenge_url: int) -> dict:
+def get_challenge_info(challenge_url: str) -> dict:
     """Extract challenge ID from URL and fetch challenge info."""
     challenge_slug = challenge_url.rstrip("/").split("/")[-1]
     url = f"https://labs.hackthebox.com/api/v4/challenge/info/{challenge_slug}"
@@ -148,9 +149,14 @@ Ensure proper parameter usage with all functions.
 
 
 def start_hacking(agent):
-    challenge_url = input("Enter the challenge URL: ")
+    # get argument from command line
+    try:
+        challenge_url = sys.argv[1]
+    except IndexError:
+        challenge_url = input("Enter the challenge URL: ")
     # remove url encoding like spaces %2520
     challenge_url = challenge_url.replace("%2520", " ")
+    print(f"Challenge URL: {challenge_url}")
     task = f"Get the challenge info from this url: {challenge_url}"
     for chunk in agent.stream(
         {"messages": [{"role": "user", "content": task}]},
