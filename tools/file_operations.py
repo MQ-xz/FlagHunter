@@ -15,6 +15,9 @@ def read_file(file_path: str) -> str:
 
 def write_file(file_path: str, content: str) -> None:
     """Write content to a file."""
+    _dir = os.path.dirname(file_path)
+    if _dir and not os.path.exists(_dir):
+        os.makedirs(_dir)
     try:
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(content)

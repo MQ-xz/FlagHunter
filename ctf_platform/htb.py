@@ -33,7 +33,7 @@ htb_headers = {
 }
 
 
-def get_challenge_info(challenge_url: str) -> dict:
+def get_challenge_info(challenge_url: int) -> dict:
     """Extract challenge ID from URL and fetch challenge info."""
     challenge_slug = challenge_url.rstrip("/").split("/")[-1]
     url = f"https://labs.hackthebox.com/api/v4/challenge/info/{challenge_slug}"
@@ -41,7 +41,7 @@ def get_challenge_info(challenge_url: str) -> dict:
     return response
 
 
-def download_challenge_file(challenge_id: str, filename: str) -> str:
+def download_challenge_file(challenge_id: int, filename: str) -> str:
     """Download a challenge file from HTB."""
     url = f"https://labs.hackthebox.com/api/v4/challenge/download/{challenge_id}"
     headers = htb_headers
@@ -72,7 +72,7 @@ def start_container_instance(challenge_id: int) -> dict:
     return response
 
 
-def stop_container_instance(challenge_id: str) -> dict:
+def stop_container_instance(challenge_id: int) -> dict:
     """Stop a container instance for a challenge."""
     url = "https://labs.hackthebox.com/api/v4/challenge/stop"
     data = {"challenge_id": challenge_id}
