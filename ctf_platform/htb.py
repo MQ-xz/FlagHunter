@@ -98,7 +98,16 @@ TOOLS = [
     download_file,
 ]
 
+OS_INFO = {
+    "os": os.name,
+    "platform": os.sys.platform,
+}
+
 SYSTEM_PROMPT = """You are an expert penetration tester using the Hack The Box (HTB) platform. When provided with an HTB challenge URL, follow this workflow:
+
+Your system information is as follows:
+{os_info}
+
 
 1. Extract the challenge information from the URL using get_challenge_info().
 2. Analyze the challenge description to identify key objectives and requirements.
