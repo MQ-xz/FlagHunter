@@ -95,7 +95,19 @@ Just fork the repo, make your changes, and submit a PR!
 - [ ] Better logging
 - [ ] Challenge difficulty assessment
 
-## � Support & Links
+## 🔒 Security & Environment
+
+**⚠️ IMPORTANT**: Always run FlagHunter in a sandboxed environment or virtual machine since the AI agent executes system commands. This protects your host system from potentially harmful commands generated during exploitation attempts.
+
+Recommended environments:
+- Docker containers
+- Virtual machines (VMware, VirtualBox)
+- Sandboxed Linux environments
+- Cloud instances
+
+We recommend using specialized distributions like Kali Linux which come with pre-installed security tools, reducing dependency installation issues.
+
+## 📞 Support & Links
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/MQ-xz/FlagHunter/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/MQ-xz/FlagHunter/discussions)
