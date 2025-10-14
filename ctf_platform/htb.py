@@ -167,6 +167,10 @@ Your system information is as follows:
 
 def start_hacking(agent):
     # get argument from command line
+    try:
+        challenge_url = sys.argv[1]
+    except IndexError:
+        challenge_url = input("Enter the challenge URL: ")
     type = "mechine" if "machines" in challenge_url else "challenge"
     # remove url encoding like spaces %2520
     challenge_url = challenge_url.replace("%2520", " ")
