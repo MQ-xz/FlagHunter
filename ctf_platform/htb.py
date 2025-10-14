@@ -34,7 +34,7 @@ htb_headers = {
 }
 
 
-def get_challenge_info(challenge_url: str, type="mechine") -> dict:
+def get_challenge_info(challenge_url: str, type=None) -> dict:
     """Extract challenge ID from URL and fetch challenge info."""
     challenge_slug = challenge_url.rstrip("/").split("/")[-1]
     if type == "mechine":
@@ -56,7 +56,7 @@ def download_challenge_file(challenge_id: int, filename: str) -> str:
     return download_file(url, file_path, headers=headers)
 
 
-def submit_flag(challenge_id: int, flag: str, difficulty: int = 10, type="mechine") -> dict:
+def submit_flag(challenge_id: int, flag: str, difficulty: int = 10, type=None) -> dict:
     """Submit a flag to the Hack The Box platform."""
     if type == "mechine":
         url = "https://labs.hackthebox.com/api/v5/machine/own"
@@ -70,7 +70,7 @@ def submit_flag(challenge_id: int, flag: str, difficulty: int = 10, type="mechin
     return response
 
 
-def start_container_instance(challenge_id: int, type="mechine") -> dict:
+def start_container_instance(challenge_id: int, type=None) -> dict:
     """Start a container instance for a challenge."""
     if type == "mechine":
         url = "https://labs.hackthebox.com/api/v4/vm/spawn"
@@ -84,7 +84,7 @@ def start_container_instance(challenge_id: int, type="mechine") -> dict:
     return response
 
 
-def stop_container_instance(challenge_id: int, type="mechine") -> dict:
+def stop_container_instance(challenge_id: int, type=None) -> dict:
     """Stop a container instance for a challenge."""
     if type == "mechine":
         url = "https://labs.hackthebox.com/api/v4/vm/terminate"
@@ -155,7 +155,7 @@ Your system information is as follows:
    - Set permissions with change_file_permissions()
    - Execute with execute_command()
 
-6. Submit the discovered flag (format "HTB{...}") using submit_flag(). if you get 403 on submiting flag this mean the flag is incorrect so dont try to submit again and again untill you are sure about the flag.
+6. Submit the discovered flag (format "HTB{...}") using submit_flag(). if you get 403 on submiting flag this mean the flag is incorrect so dont try to submit the same flag again and again. instead retry the whole process again to find the correct flag.
 
 - Always approach challenges methodically, thinking step-by-step.
 - Don't make up your own flags and try to submit, only submit when you are sure you have the correct flag.
@@ -167,18 +167,14 @@ Your system information is as follows:
 
 def start_hacking(agent):
     # get argument from command line
-    try:
-        challenge_url = sys.argv[1]
-    except IndexError:
-        challenge_url = input("Enter the challenge URL: ")
-    type = "mechine" if "machines" in challenge_url else "normal"
+    type = "mechine" if "machines" in challenge_url else "challenge"
     # remove url encoding like spaces %2520
     challenge_url = challenge_url.replace("%2520", " ")
     print(f"Challenge URL: {challenge_url}")
-    task = f"Get the challenge info from this url: {challenge_url}\nChallenge type: {type}"
+    task = f"Get the challenge info from this url: {challenge_url}\nChallenge type: {type}\n\n your task is to go the challenge, find the flag and submit it using submit_flag() function. if you get 403 on submiting flag this mean the flag is incorrect so dont try to submit the same flag again and again. instead retry the whole process again to find the correct flag."
     for chunk in agent.stream(
         {"messages": [{"role": "user", "content": task}]},
-        {"recursion_limit": 100},
+        {"recursion_limit": 200},
         stream_mode="updates",
     ):
         for step, data in chunk.items():
