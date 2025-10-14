@@ -145,6 +145,7 @@ Your system information is as follows:
 Always approach challenges methodically, thinking step-by-step.
 Don't make up your own flags and try to submit, only submit when you are sure you have the correct flag.
 Ensure proper parameter usage with all functions.
+Dont call API functions multiple times unnecessarily, bcz it may lead to rate limiting or unexpected behavior. so call them only when needed. else check history or previous responses.
 """
 
 
