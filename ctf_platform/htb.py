@@ -155,7 +155,7 @@ Your system information is as follows:
    - Set permissions with change_file_permissions()
    - Execute with execute_command()
 
-6. Submit the discovered flag (format "HTB{...}") using submit_flag().
+6. Submit the discovered flag (format "HTB{...}") using submit_flag(). if you get 403 on submiting flag this mean the flag is incorrect so dont try to submit again and again untill you are sure about the flag.
 
 - Always approach challenges methodically, thinking step-by-step.
 - Don't make up your own flags and try to submit, only submit when you are sure you have the correct flag.
