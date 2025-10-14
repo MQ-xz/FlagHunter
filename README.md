@@ -2,6 +2,8 @@
 
 An autonomous AI agent framework for solving CTF challenges automatically. More than just a tool - it's an extensible framework that you can customize for your specific use cases with plug-and-play architecture.
 
+> **🚧 Development Status**: This project is actively under development. Features and APIs may change as we continue to improve and expand capabilities.
+
 ## ✨ What It Does
 
 - 🎯 **Automatically solves CTF challenges** - Just give it a challenge URL
