@@ -32,8 +32,11 @@ python app.py "https://labs.hackthebox.com/challenges/your-challenge"
 
 ## 🎥 Demo Videos
 
-- [Solving Protein Cookies (HTB)](https://youtu.be/wYipvYGVxlQ)
-- [Solving RSAisEasy (HTB)](https://youtu.be/ccN4FukafU4)
+### Solving Protein Cookies (HTB)
+[![Solving Protein Cookies (HTB)](https://img.youtube.com/vi/wYipvYGVxlQ/maxresdefault.jpg)](https://youtu.be/wYipvYGVxlQ)
+
+### Solving RSAisEasy (HTB)
+[![Solving RSAisEasy (HTB)](https://img.youtube.com/vi/ccN4FukafU4/maxresdefault.jpg)](https://youtu.be/ccN4FukafU4)
 
 ## ⚙️ Configuration
 
