@@ -34,10 +34,13 @@ htb_headers = {
 }
 
 
-def get_challenge_info(challenge_url: str) -> dict:
+def get_challenge_info(challenge_url: str, type="mechine") -> dict:
     """Extract challenge ID from URL and fetch challenge info."""
     challenge_slug = challenge_url.rstrip("/").split("/")[-1]
-    url = f"https://labs.hackthebox.com/api/v4/challenge/info/{challenge_slug}"
+    if type == "mechine":
+        url = f'https://labs.hackthebox.com/api/v4/machine/profile/{challenge_slug}'
+    else:
+        url = f"https://labs.hackthebox.com/api/v4/challenge/info/{challenge_slug}"
     response = send_request_and_get_response(url, headers=htb_headers)
     return response
 
@@ -53,30 +56,42 @@ def download_challenge_file(challenge_id: int, filename: str) -> str:
     return download_file(url, file_path, headers=headers)
 
 
-def submit_flag(challenge_id: int, flag: str, difficulty: int = 10) -> dict:
+def submit_flag(challenge_id: int, flag: str, difficulty: int = 10, type="mechine") -> dict:
     """Submit a flag to the Hack The Box platform."""
-    url = "https://labs.hackthebox.com/api/v4/challenge/own"
-    data = {"flag": flag, "difficulty": difficulty, "challenge_id": challenge_id}
+    if type == "mechine":
+        url = "https://labs.hackthebox.com/api/v5/machine/own"
+        data = {"flag": flag, "id": challenge_id}
+    else:
+        url = "https://labs.hackthebox.com/api/v4/challenge/own"
+        data = {"flag": flag, "difficulty": difficulty, "challenge_id": challenge_id}
     response = send_request_and_get_response(
         url, method="POST", headers=htb_headers, data=data
     )
     return response
 
 
-def start_container_instance(challenge_id: int) -> dict:
+def start_container_instance(challenge_id: int, type="mechine") -> dict:
     """Start a container instance for a challenge."""
-    url = "https://labs.hackthebox.com/api/v4/challenge/start"
-    data = {"challenge_id": challenge_id}
+    if type == "mechine":
+        url = "https://labs.hackthebox.com/api/v4/vm/spawn"
+        data = {"machine_id": challenge_id}
+    else:
+        url = "https://labs.hackthebox.com/api/v4/challenge/start"
+        data = {"challenge_id": challenge_id}
     response = send_request_and_get_response(
         url, method="POST", headers=htb_headers, data=data
     )
     return response
 
 
-def stop_container_instance(challenge_id: int) -> dict:
+def stop_container_instance(challenge_id: int, type="mechine") -> dict:
     """Stop a container instance for a challenge."""
-    url = "https://labs.hackthebox.com/api/v4/challenge/stop"
-    data = {"challenge_id": challenge_id}
+    if type == "mechine":
+        url = "https://labs.hackthebox.com/api/v4/vm/terminate"
+        data = {"machine_id": challenge_id}
+    else:
+        url = "https://labs.hackthebox.com/api/v4/challenge/stop"
+        data = {"challenge_id": challenge_id}
     response = send_request_and_get_response(
         url, method="POST", headers=htb_headers, data=data
     )
@@ -110,7 +125,7 @@ Your system information is as follows:
 {os_info}
 
 
-1. Extract the challenge information from the URL using get_challenge_info().
+1. Extract the challenge information from the URL using get_challenge_info(). based on the challenge type (normal or mechine) pass the type parameter accordingly.
 2. Analyze the challenge description to identify key objectives and requirements.
 3. Based on the play_methods in the challenge information:
    a) If BOTH download AND container are available:
@@ -142,10 +157,11 @@ Your system information is as follows:
 
 6. Submit the discovered flag (format "HTB{...}") using submit_flag().
 
-Always approach challenges methodically, thinking step-by-step.
-Don't make up your own flags and try to submit, only submit when you are sure you have the correct flag.
-Ensure proper parameter usage with all functions.
-Dont call API functions multiple times unnecessarily, bcz it may lead to rate limiting or unexpected behavior. so call them only when needed. else check history or previous responses.
+- Always approach challenges methodically, thinking step-by-step.
+- Don't make up your own flags and try to submit, only submit when you are sure you have the correct flag.
+- Ensure proper parameter usage with all functions.
+- Dont call API functions multiple times unnecessarily, bcz it may lead to rate limiting or unexpected behavior. so call them only when needed. else check history or previous responses.
+- if you are downloading any file or tool use downloads/ directory to save it.
 """
 
 
@@ -155,10 +171,11 @@ def start_hacking(agent):
         challenge_url = sys.argv[1]
     except IndexError:
         challenge_url = input("Enter the challenge URL: ")
+    type = "mechine" if "machines" in challenge_url else "normal"
     # remove url encoding like spaces %2520
     challenge_url = challenge_url.replace("%2520", " ")
     print(f"Challenge URL: {challenge_url}")
-    task = f"Get the challenge info from this url: {challenge_url}"
+    task = f"Get the challenge info from this url: {challenge_url}\nChallenge type: {type}"
     for chunk in agent.stream(
         {"messages": [{"role": "user", "content": task}]},
         {"recursion_limit": 100},
