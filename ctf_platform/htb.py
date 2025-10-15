@@ -37,7 +37,7 @@ htb_headers = {
 def get_challenge_info(challenge_url: str, type=None) -> dict:
     """Extract challenge ID from URL and fetch challenge info."""
     challenge_slug = challenge_url.rstrip("/").split("/")[-1]
-    if type == "mechine":
+    if type == "machine":
         url = f'https://labs.hackthebox.com/api/v4/machine/profile/{challenge_slug}'
     else:
         url = f"https://labs.hackthebox.com/api/v4/challenge/info/{challenge_slug}"
@@ -58,7 +58,7 @@ def download_challenge_file(challenge_id: int, filename: str) -> str:
 
 def submit_flag(challenge_id: int, flag: str, difficulty: int = 10, type=None) -> dict:
     """Submit a flag to the Hack The Box platform."""
-    if type == "mechine":
+    if type == "machine":
         url = "https://labs.hackthebox.com/api/v5/machine/own"
         data = {"flag": flag, "id": challenge_id}
     else:
@@ -72,7 +72,7 @@ def submit_flag(challenge_id: int, flag: str, difficulty: int = 10, type=None) -
 
 def start_container_instance(challenge_id: int, type=None) -> dict:
     """Start a container instance for a challenge."""
-    if type == "mechine":
+    if type == "machine":
         url = "https://labs.hackthebox.com/api/v4/vm/spawn"
         data = {"machine_id": challenge_id}
     else:
@@ -86,7 +86,7 @@ def start_container_instance(challenge_id: int, type=None) -> dict:
 
 def stop_container_instance(challenge_id: int, type=None) -> dict:
     """Stop a container instance for a challenge."""
-    if type == "mechine":
+    if type == "machine":
         url = "https://labs.hackthebox.com/api/v4/vm/terminate"
         data = {"machine_id": challenge_id}
     else:
@@ -125,7 +125,7 @@ Your system information is as follows:
 {os_info}
 
 
-1. Extract the challenge information from the URL using get_challenge_info(). based on the challenge type (normal or mechine) pass the type parameter accordingly.
+1. Extract the challenge information from the URL using get_challenge_info(). based on the challenge type (normal or machine) pass the type parameter accordingly.
 2. Analyze the challenge description to identify key objectives and requirements.
 3. Based on the play_methods in the challenge information:
    a) If BOTH download AND container are available:
@@ -171,7 +171,7 @@ def start_hacking(agent):
         challenge_url = sys.argv[1]
     except IndexError:
         challenge_url = input("Enter the challenge URL: ")
-    type = "mechine" if "machines" in challenge_url else "challenge"
+    type = "machine" if "machines" in challenge_url else "challenge"
     # remove url encoding like spaces %2520
     challenge_url = challenge_url.replace("%2520", " ")
     print(f"Challenge URL: {challenge_url}")
