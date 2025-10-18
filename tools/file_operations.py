@@ -36,7 +36,14 @@ def change_file_permissions(file_path: str, permissions: int) -> None:
 def list_directory_contents(directory_path: str) -> list:
     """List the contents of a directory."""
     try:
-        return os.listdir(directory_path)
+        items = []
+        for item in os.listdir(directory_path):
+            item_path = os.path.join(directory_path, item)
+            if os.path.isdir(item_path):
+                items.append(f"{item}/ (directory)")
+            else:
+                items.append(f"{item} (file)")
+        return items
     except Exception as e:
         return f"Error listing directory contents for {directory_path}: {e}"
 
