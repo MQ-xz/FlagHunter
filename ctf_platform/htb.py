@@ -70,7 +70,7 @@ def download_challenge_attachment(challenge_id: int, header: dict) -> None:
     url = f"https://labs.hackthebox.com/api/v4/challenge/download/{challenge_id}"
     download_result = request_and_respond(url, headers=header, response_type="content")
     workspace = f"challenges/{challenge_id}/"
-    file_name = f"challenge_{challenge_id}_attachment.zip"
+    file_name = "attachment.zip"
     file_path = os.path.join(workspace, file_name)
     if not os.path.exists(workspace):
         os.makedirs(workspace)
@@ -78,7 +78,7 @@ def download_challenge_attachment(challenge_id: int, header: dict) -> None:
         file.write(download_result)
     extract_zip(
         zip_path=file_path,
-        extract_to=workspace,
+        extract_to=f"{workspace}/extracted/",
         password="hackthebox",
     )
 

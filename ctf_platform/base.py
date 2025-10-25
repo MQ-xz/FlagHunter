@@ -65,7 +65,7 @@ class BasePlatform:
         - Install additional tools as needed using execute_command()
 
         For custom exploits:
-        - Create files using write_file() in the exploits/<challenge_id> directory
+        - Create files using write_file() in the challenges/<challenge_id>/exploits/ directory
         - Set permissions with change_file_permissions()
         - Execute with execute_command()
 
@@ -75,8 +75,8 @@ class BasePlatform:
         - Always approach challenges methodically, thinking step-by-step.
         - Don't make up your own flags and try to submit, only submit when you are sure you have the correct flag.
         - Don't call API functions multiple times unnecessarily, because it may lead to rate limiting or unexpected behavior. So call them only when needed. Else check history or previous responses.
-        - If challenge has any file or attachment, it should be saved in the workspace directory, also if you are writing any exploit or script for the challenge, you can use the same directory to save your files.
-        - When ever using filepaths or directory paths, make sure to added workspace/<challenge_id>/ as prefix to the path. to ensure you are working within the challenge workspace.
+        - If challenge has any file or attachment, it should be saved in the challenges/<challenge_id>/ directory, also if you are writing any exploit or script for the challenge, you can use the same directory to save your files.
+        - When ever using filepaths or directory paths, make sure to added challenges/<challenge_id>/ as prefix to the path. to ensure you are working within the challenge workspace.
         """
 
     def get_logger(self, challenge: str):
