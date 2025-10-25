@@ -1,15 +1,18 @@
 """Request handling utilities."""
 
+import os
 import requests
+from langchain_core.tools import tool
 
 
-def send_request_and_get_response(
+def request_and_respond(
     url: str,
     method: str = "GET",
     headers: dict = None,
     formData: dict = None,
     data: dict = None,
     timeout: int = 60,
+    response_type: str = "json",
 ) -> dict:
     """Send an HTTP request and return the response content."""
     try:
@@ -17,7 +20,11 @@ def send_request_and_get_response(
             method, url, headers=headers, data=formData, json=data, timeout=timeout
         )
         response.raise_for_status()  # Raise an error for bad responses
-        return {"status_code": response.status_code, "content": response.text}
+        if response_type == "json":
+            return response.json()
+        elif response_type == "content":
+            return response.content
+        return response.text
     except requests.RequestException as e:
         print(f"Error: {e}")
         return {"error": str(e)}
@@ -26,7 +33,31 @@ def send_request_and_get_response(
         return {"error": str(e)}
 
 
+@tool
+def send_request_and_get_response(
+    url: str,
+    method: str = "GET",
+    headers: dict = None,
+    formData: dict = None,
+    data: dict = None,
+    timeout: int = 60,
+    response_type: str = "json",
+) -> dict:
+    """Tool to send an HTTP request and return the response content."""
+    return request_and_respond(
+        url=url,
+        method=method,
+        headers=headers,
+        formData=formData,
+        data=data,
+        timeout=timeout,
+        response_type=response_type,
+    )
+
+
+@tool
 def download_file(
+    workspace: str,
     url: str,
     file_path: str,
     method: str = "GET",
@@ -40,7 +71,7 @@ def download_file(
             method, url, headers=headers, data=formData, timeout=timeout
         )
         response.raise_for_status()  # Raise an error for bad responses
-        with open(file_path, "wb") as file:
+        with open(os.path.join(workspace, file_path), "wb") as file:
             file.write(response.content)
         return file_path
     except requests.RequestException as e:

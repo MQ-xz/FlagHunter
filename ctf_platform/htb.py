@@ -26,7 +26,6 @@ htb_headers = {
     "accept": "application/json, text/plain, */*",
     "accept-encoding": "gzip, deflate, br, zstd",
     "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-    "authorization": auth_token,
     "origin": "https://app.hackthebox.com",
     "priority": "u=1, i",
     "referer": "https://app.hackthebox.com/",
@@ -40,134 +39,136 @@ htb_headers = {
 }
 
 
-def get_challenge_info(challenge_url: str, type=None) -> dict:
+def get_headers() -> dict:
+    """Generate HTB headers with authentication token."""
+    headers = HEADERS.copy()
+    headers["authorization"] = os.getenv("HTB_AUTH_TOKEN")
+    return headers
+
+
+def clean_challenge_url(challenge_url: str) -> str:
+    """Clean and standardize the challenge URL."""
+    return challenge_url.replace("%2520", " ")
+
+
+def get_challenge_info(
+    challenge_url: str, header: dict, challenge_type: str | None = None
+) -> dict:
     """Extract challenge ID from URL and fetch challenge info."""
+    challenge_url = clean_challenge_url(challenge_url)
     challenge_slug = challenge_url.rstrip("/").split("/")[-1]
-    if type == "machine":
-        url = f'https://labs.hackthebox.com/api/v4/machine/profile/{challenge_slug}'
+    if challenge_type == "machine":
+        url = f"https://labs.hackthebox.com/api/v4/machine/profile/{challenge_slug}"
     else:
         url = f"https://labs.hackthebox.com/api/v4/challenge/info/{challenge_slug}"
-    response = send_request_and_get_response(url, headers=htb_headers)
-    return response
+    response = request_and_respond(url, headers=header)
+    return response.get("challenge", {})
 
 
-def download_challenge_file(challenge_id: int, filename: str) -> str:
-    """Download a challenge file from HTB."""
+def download_challenge_attachment(challenge_id: int, header: dict) -> None:
+    """Download challenge attachment."""
     url = f"https://labs.hackthebox.com/api/v4/challenge/download/{challenge_id}"
-    headers = htb_headers
-    headers["accept"] = "application/octet-stream"
-    if not os.path.exists("downloads"):
-        os.makedirs("downloads")
-    file_path = "downloads/" + filename
-    return download_file(url, file_path, headers=headers)
+    download_result = request_and_respond(url, headers=header, response_type="content")
+    workspace = f"challenges/{challenge_id}/"
+    file_name = f"challenge_{challenge_id}_attachment.zip"
+    file_path = os.path.join(workspace, file_name)
+    if not os.path.exists(workspace):
+        os.makedirs(workspace)
+    with open(file_path, "wb") as file:
+        file.write(download_result)
+    extract_zip(
+        zip_path=file_path,
+        extract_to=workspace,
+        password="hackthebox",
+    )
 
 
-def submit_flag(challenge_id: int, flag: str, difficulty: int = 10, type=None) -> dict:
+@tool
+def submit_flag(
+    challenge_id: int,
+    flag: str,
+    difficulty: int = 10,
+    challenge_type=None,
+    config: RunnableConfig = None,
+) -> dict:
     """Submit a flag to the Hack The Box platform."""
-    if type == "machine":
+    if challenge_type == "machine":
         url = "https://labs.hackthebox.com/api/v5/machine/own"
         data = {"flag": flag, "id": challenge_id}
     else:
         url = "https://labs.hackthebox.com/api/v4/challenge/own"
         data = {"flag": flag, "difficulty": difficulty, "challenge_id": challenge_id}
-    response = send_request_and_get_response(
-        url, method="POST", headers=htb_headers, data=data
+    response = request_and_respond(
+        url=url, method="POST", headers=config["configurable"]["headers"], data=data
     )
     return response
 
 
-def start_container_instance(challenge_id: int, type=None) -> dict:
+@tool
+def start_container_instance(
+    challenge_id: int, challenge_type=None, config: RunnableConfig = None
+) -> dict:
     """Start a container instance for a challenge."""
-    if type == "machine":
+    if challenge_type == "machine":
         url = "https://labs.hackthebox.com/api/v4/vm/spawn"
         data = {"machine_id": challenge_id}
     else:
         url = "https://labs.hackthebox.com/api/v4/challenge/start"
         data = {"challenge_id": challenge_id}
-    response = send_request_and_get_response(
-        url, method="POST", headers=htb_headers, data=data
+    response = request_and_respond(
+        url=url, method="POST", headers=config["configurable"]["headers"], data=data
     )
     return response
 
 
-def stop_container_instance(challenge_id: int, type=None) -> dict:
+@tool
+def stop_container_instance(
+    challenge_id: int, challenge_type=None, config: RunnableConfig = None
+) -> dict:
     """Stop a container instance for a challenge."""
-    if type == "machine":
+    if challenge_type == "machine":
         url = "https://labs.hackthebox.com/api/v4/vm/terminate"
         data = {"machine_id": challenge_id}
     else:
         url = "https://labs.hackthebox.com/api/v4/challenge/stop"
         data = {"challenge_id": challenge_id}
-    response = send_request_and_get_response(
-        url, method="POST", headers=htb_headers, data=data
+    response = request_and_respond(
+        url=url, method="POST", headers=config["configurable"]["headers"], data=data
     )
     return response
 
 
+@tool
+def get_container_info(
+    challenge_url: str, challenge_type=None, config: RunnableConfig = None
+) -> dict:
+    """Get container instance info for a challenge."""
+    challenge_info = get_challenge_info(
+        challenge_url,
+        header=config["configurable"]["headers"],
+        challenge_type=challenge_type,
+    )
+    return challenge_info.get("play_info", {})
+
+
 TOOLS = [
-    get_challenge_info,
-    download_challenge_file,
     submit_flag,
     start_container_instance,
     stop_container_instance,
-    read_file,
-    write_file,
-    change_file_permissions,
-    list_directory_contents,
-    extract_zip_file,
-    execute_command,
-    send_request_and_get_response,
-    download_file,
+    get_container_info,
 ]
 
-OS_INFO = {
-    "os": os.name,
-    "platform": os.sys.platform,
-}
 
-SYSTEM_PROMPT = """You are an expert penetration tester using the Hack The Box (HTB) platform. When provided with an HTB challenge URL, follow this workflow:
+SYSTEM_PROMPT = """You currently trying to solve a HackTheBox challenge. follow the steps below to solve the challenge:
 
-Your system information is as follows:
-{os_info}
+FLAG FORMAT: HTB{{...}}
 
-
-1. Extract the challenge information from the URL using get_challenge_info(). based on the challenge type (normal or machine) pass the type parameter accordingly.
-2. Analyze the challenge description to identify key objectives and requirements.
-3. Based on the play_methods in the challenge information:
-   a) If BOTH download AND container are available:
-      - Download challenge files using download_challenge_file()
-      - Extract with password "hackthebox" to `extract/<challenge_id>` directory
-      - Analyze files for vulnerabilities and functionality
-      - Start a container instance with start_container_instance()
-      - Get updated challenge info for connection details (play_info.ip and play_info.port)
-   
-   b) If ONLY container is available:
-      - Start a container instance with start_container_instance()
-      - Get updated challenge info for connection details (play_info.ip and play_info.port)
-   
-   c) If ONLY download is available:
-      - Download challenge files using download_challenge_file()
-      - Extract with password "hackthebox"  to `extract/<challenge_id>` directory
-      - Analyze files for vulnerabilities and functionality
-
-4. Utilize available tools:
-   - For OS commands: execute_command()
-   - For file operations: read_file(), write_file(), etc.
-   - For network requests: send_request_and_get_response()
-   - Install additional tools as needed using execute_command()
-
-5. For custom exploits:
-   - Create files using write_file() in the exploits/<challenge_id> directory
-   - Set permissions with change_file_permissions()
-   - Execute with execute_command()
-
-6. Submit the discovered flag (format "HTB{...}") using submit_flag(). if you get 403 on submiting flag this mean the flag is incorrect so dont try to submit the same flag again and again. instead retry the whole process again to find the correct flag.
-
-- Always approach challenges methodically, thinking step-by-step.
-- Don't make up your own flags and try to submit, only submit when you are sure you have the correct flag.
-- Ensure proper parameter usage with all functions.
-- Dont call API functions multiple times unnecessarily, bcz it may lead to rate limiting or unexpected behavior. so call them only when needed. else check history or previous responses.
-- if you are downloading any file or tool use downloads/ directory to save it.
+1. Analyze the challenge name, description, category, difficulty and any other available information to understand what is required to solve it.
+2. Check if user provided any files or attachments related to the challenge. If yes, please analyze them to understand their purpose, how they work, and if they contain any vulnerabilities that can be exploited.
+3. If the challenge contains a container as well then follow the steps:
+    a. Start the container instance using start_container_instance() tool.
+    b. Get the container connection details using get_container_info() tool.
+4. Based on the challenge type and available information, plan your approach to solve the challenge. This may involve:
 """
 
 
@@ -177,7 +178,7 @@ def start_hacking(agent):
         challenge_url = sys.argv[1]
     except IndexError:
         challenge_url = input("Enter the challenge URL: ")
-    type = "machine" if "machines" in challenge_url else "challenge"
+    challenge_type = "machine" if "machines" in challenge_url else "challenge"
     # remove url encoding like spaces %2520
     challenge_url = challenge_url.replace("%2520", " ")
     print(f"Challenge URL: {challenge_url}")

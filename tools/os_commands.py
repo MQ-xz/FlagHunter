@@ -1,8 +1,10 @@
 """OS command execution utilities"""
 
 import subprocess
+from langchain_core.tools import tool
 
 
+@tool
 def execute_command(command: str) -> str:
     """Execute a shell command and return its output."""
     try:

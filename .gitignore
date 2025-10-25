@@ -1,9 +1,7 @@
 venv/
 .env
 
-downloads/
-extract/
-exploits/
+challenges/
 logs/
 
 __pycache__/
