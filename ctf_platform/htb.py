@@ -12,6 +12,12 @@ from tools.file_operations import (
     extract_zip_file,
 )
 from tools.os_commands import execute_command
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.text import Text
+from rich import box
+import json
 
 load_dotenv()
 auth_token = os.getenv("HTB_AUTH_TOKEN")
@@ -176,11 +182,66 @@ def start_hacking(agent):
     challenge_url = challenge_url.replace("%2520", " ")
     print(f"Challenge URL: {challenge_url}")
     task = f"Get the challenge info from this url: {challenge_url}\nChallenge type: {type}\n\n your task is to go the challenge, find the flag and submit it using submit_flag() function. if you get 403 on submiting flag this mean the flag is incorrect so dont try to submit the same flag again and again. instead retry the whole process again to find the correct flag."
+    console = Console()
+
     for chunk in agent.stream(
         {"messages": [{"role": "user", "content": task}]},
         {"recursion_limit": 200},
         stream_mode="updates",
     ):
         for step, data in chunk.items():
-            print(f"step: {step}")
-            print(f"content: {data['messages'][-1].content_blocks}")
+            # Step as a styled title panel
+            console.print()
+            console.rule(f"[bold cyan]⚡ Step: {step}[/bold cyan]", style="cyan")
+
+            messages = data.get("messages", [])
+            if not messages:
+                continue
+
+            content_blocks = messages[-1].content_blocks
+            if not content_blocks:
+                continue
+
+            # Build table
+            table = Table(
+                box=box.ROUNDED,
+                show_header=True,
+                header_style="bold magenta",
+                border_style="dim cyan",
+                expand=True,
+                padding=(0, 1),
+            )
+            table.add_column("Type", style="bold yellow", width=12, no_wrap=True)
+            table.add_column("Name / ID", style="cyan", width=24)
+            table.add_column("Content", style="white")
+
+            for block in content_blocks:
+                block_type = block.get("type", "unknown")
+
+                if block_type == "text":
+                    text = block.get("text", "")
+                    table.add_row(
+                        "[green]📝 text[/green]",
+                        "—",
+                        Text(text, overflow="fold"),
+                    )
+
+                elif block_type == "tool_call":
+                    name = block.get("name", "")
+                    call_id = block.get("id", "")
+                    args = block.get("args", {})
+                    args_str = json.dumps(args, indent=2)
+                    table.add_row(
+                        "[blue]🔧 tool_call[/blue]",
+                        f"[bold]{name}[/bold]\n[dim]{call_id}[/dim]",
+                        Text(args_str, overflow="fold"),
+                    )
+
+                else:
+                    table.add_row(
+                        f"[dim]{block_type}[/dim]",
+                        "—",
+                        Text(str(block), overflow="fold"),
+                    )
+
+            console.print(table)
