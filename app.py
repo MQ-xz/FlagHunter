@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
+import sys
 
 from ctf_platform.htb import TOOLS, SYSTEM_PROMPT, start_hacking
 
@@ -27,4 +28,10 @@ agent = create_agent(
 
 
 if __name__ == "__main__":
-    start_hacking(agent)
+    try:
+        start_hacking(agent)
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupt caught. Exiting...")
+        sys.exit(0)
+    finally:
+        print("Exiting the program.")
