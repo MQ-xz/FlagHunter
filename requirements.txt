@@ -1,4 +1,4 @@
 langchain==1.0.0a14
-langchain-openai==1.0.0a4
+langchain-openai==1.1.14
 python-dotenv==1.1.1
 rich==14.3.3
